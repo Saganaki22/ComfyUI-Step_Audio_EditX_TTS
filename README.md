@@ -14,6 +14,8 @@
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
 </div>
 
+<img width="1505" height="1032" alt="image" src="https://github.com/user-attachments/assets/42c63b81-98e0-49ec-9199-3fbb04e2db9c" />
+
 
 Professional native ComfyUI nodes for **Step Audio EditX** - State-of-the-art zero-shot voice cloning and audio editing with emotion, style, speed control, and more.
 
