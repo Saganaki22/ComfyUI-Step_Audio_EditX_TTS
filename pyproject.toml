@@ -1,42 +1,12 @@
 [project]
 name = "comfyui-step-audio-editx-tts"
-version = "1.0.0"
 description = "Professional voice cloning and audio editing node for ComfyUI using Step Audio EditX"
-readme = "README.md"
-requires-python = ">=3.9"
+version = "1.0.0"
 license = {text = "Apache-2.0"}
-authors = [
-    {name = "Step Audio EditX ComfyUI Team"}
-]
-keywords = [
-    "comfyui",
-    "tts",
-    "voice-cloning",
-    "audio-editing",
-    "step-audio",
-    "text-to-speech",
-    "ai-audio",
-    "deep-learning"
-]
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Topic :: Multimedia :: Sound/Audio",
-    "Topic :: Multimedia :: Sound/Audio :: Speech",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence"
-]
-
 dependencies = [
     "torch>=2.0.0",
     "torchaudio>=2.0.0",
-    "transformers>=4.53.0",
+    "transformers==4.53.0",
     "numpy>=1.24.0",
     "onnxruntime-gpu>=1.20.0",
     "funasr>=1.1.3",
@@ -46,38 +16,11 @@ dependencies = [
     "pillow>=10.0.0"
 ]
 
-[project.optional-dependencies]
-quantization = [
-    "bitsandbytes>=0.41.0",
-    "auto-gptq>=0.4.0"
-]
-dev = [
-    "pytest>=7.0.0",
-    "black>=23.0.0",
-    "flake8>=6.0.0",
-    "mypy>=1.0.0"
-]
-
 [project.urls]
-Homepage = "https://github.com/stepfun-ai/step-audio"
-Documentation = "https://github.com/stepfun-ai/step-audio/blob/main/README.md"
-Repository = "https://github.com/stepfun-ai/step-audio"
-Issues = "https://github.com/stepfun-ai/step-audio/issues"
+Repository = "https://github.com/Saganaki22/ComfyUI-Step_Audio_EditX_TTS"
 
-[build-system]
-requires = ["setuptools>=45", "wheel", "setuptools-scm>=6.2"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = ["core", "nodes", "js", "resources"]
-
-[tool.black]
-line-length = 120
-target-version = ['py39', 'py310', 'py311']
-include = '\.pyi?$'
-
-[tool.mypy]
-python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
+# Used by Comfy Registry https://comfyregistry.org
+[tool.comfy]
+PublisherId = "saganaki22"
+DisplayName = "Step Audio EditX TTS"
+Icon = "https://avatars.githubusercontent.com/u/84208527"
