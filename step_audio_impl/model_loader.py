@@ -2,6 +2,7 @@
 Unified model loading utility supporting ModelScope, HuggingFace and local path loading
 """
 import os
+import json
 import logging
 import threading
 from typing import Optional, Dict, Any, Tuple
@@ -26,6 +27,14 @@ except (ImportError, ModuleNotFoundError) as e:
     AutoAWQForCausalLM = None
     AWQ_AVAILABLE = False
     # Silently continue without AWQ support
+
+# Optional safetensors support (for FP8 loading)
+try:
+    from safetensors.torch import load_file as load_safetensors
+    SAFETENSORS_AVAILABLE = True
+except ImportError:
+    load_safetensors = None
+    SAFETENSORS_AVAILABLE = False
 
 # Global cache for downloaded models to avoid repeated downloads
 # Key: (model_path, source)
@@ -118,12 +127,107 @@ class UnifiedModelLoader:
         modelscope_patterns = []
         return any(pattern in model_path for pattern in modelscope_patterns)
 
+    def _load_fp8_model(self, model_path: str, model_class, config, device_map: str = "auto") -> Any:
+        """
+        Load FP8 e4m3fn quantized model from safetensors with proper dtype conversion.
+
+        This handles models that were quantized offline to FP8 format where:
+        - Certain layers (attention, mlp) are stored as FP8 (as uint8 that needs conversion)
+        - Other layers (embeddings, norms) remain in FP16
+        - Metadata in model.safetensors.index.json specifies which layers are FP8
+
+        Args:
+            model_path: Path to model directory containing safetensors files
+            model_class: Model class to instantiate
+            config: Model configuration
+            device_map: Device mapping for model loading
+
+        Returns:
+            Loaded model with FP8 weights
+        """
+        if not SAFETENSORS_AVAILABLE:
+            raise ImportError("FP8 quantization requires 'safetensors' library. Install with: pip install safetensors")
+
+        # Check for FP8 support (requires PyTorch 2.1+)
+        if not hasattr(torch, 'float8_e4m3fn'):
+            raise RuntimeError("FP8 e4m3fn requires PyTorch 2.1 or later with FP8 support")
+
+        self.logger.info(f"🔧 Loading FP8 e4m3fn quantized model from: {model_path}")
+
+        # Load the safetensors index to get metadata
+        index_path = os.path.join(model_path, "model.safetensors.index.json")
+        if not os.path.exists(index_path):
+            raise FileNotFoundError(
+                f"FP8 model index not found at {index_path}. "
+                f"Ensure your FP8 quantized model has model.safetensors.index.json with fp8_layers metadata."
+            )
+
+        with open(index_path, "r") as f:
+            index_data = json.load(f)
+
+        # Get FP8 layer list from metadata
+        if "metadata" not in index_data or "fp8_layers" not in index_data["metadata"]:
+            raise ValueError(
+                f"Invalid FP8 model: model.safetensors.index.json must contain metadata.fp8_layers. "
+                f"Found keys: {list(index_data.get('metadata', {}).keys())}"
+            )
+
+        fp8_layers = set(index_data["metadata"]["fp8_layers"])
+        self.logger.info(f"🔧 Found {len(fp8_layers)} FP8 layers in model metadata")
+
+        # Load all safetensors files
+        weight_map = index_data.get("weight_map", {})
+        safetensors_files = set(weight_map.values())
+
+        # Merge state dicts from all files
+        state_dict = {}
+        for st_file in safetensors_files:
+            st_path = os.path.join(model_path, st_file)
+            if not os.path.exists(st_path):
+                raise FileNotFoundError(f"Safetensors file not found: {st_path}")
+
+            self.logger.info(f"Loading weights from: {st_file}")
+            file_state_dict = load_safetensors(st_path)
+            state_dict.update(file_state_dict)
+
+        # Convert uint8 FP8 layers back to torch.float8_e4m3fn
+        converted_count = 0
+        for layer_name in fp8_layers:
+            if layer_name in state_dict:
+                uint8_tensor = state_dict[layer_name]
+                # Convert uint8 storage back to FP8 dtype
+                fp8_tensor = uint8_tensor.view(torch.float8_e4m3fn)
+                state_dict[layer_name] = fp8_tensor
+                converted_count += 1
+
+        self.logger.info(f"🔧 Converted {converted_count} layers from uint8 to FP8 e4m3fn")
+
+        # Create model with config
+        self.logger.info(f"🔧 Initializing model architecture...")
+        model = model_class(config)
+
+        # Load state dict (strict=False to handle missing/unexpected keys gracefully)
+        self.logger.info(f"🔧 Loading FP8 state dict into model...")
+        missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
+
+        if missing_keys:
+            self.logger.warning(f"Missing keys when loading FP8 model: {missing_keys[:5]}...")
+        if unexpected_keys:
+            self.logger.warning(f"Unexpected keys when loading FP8 model: {unexpected_keys[:5]}...")
+
+        # Move to device if specified
+        if device_map != "auto":
+            model = model.to(device_map)
+
+        self.logger.info(f"✅ Successfully loaded FP8 e4m3fn model")
+        return model
+
     def _prepare_quantization_config(self, quantization_config: Optional[str], torch_dtype: Optional[torch.dtype] = None) -> Tuple[Dict[str, Any], bool]:
         """
         Prepare quantization configuration for model loading
 
         Args:
-            quantization_config: Quantization type ('int4', 'int8', 'int4_offline_awq', or None)
+            quantization_config: Quantization type ('int4', 'int8', 'int4_offline_awq', 'fp8_e4m3fn', or None)
             torch_dtype: PyTorch data type for compute operations
 
         Returns:
@@ -134,7 +238,12 @@ class UnifiedModelLoader:
 
         quantization_config = quantization_config.lower()
 
-        if quantization_config == "int4_offline_awq":
+        if quantization_config == "fp8_e4m3fn":
+            # For pre-quantized FP8 models, no additional quantization needed at load time
+            # The custom loader will handle FP8 conversion from stored uint8
+            self.logger.info("🔧 Loading pre-quantized FP8 e4m3fn model (offline)")
+            return {"_use_fp8_loader": True}, True  # Flag to use custom FP8 loader
+        elif quantization_config == "int4_offline_awq":
             # For pre-quantized AWQ models, no additional quantization needed
             self.logger.info("🔧 Loading pre-quantized AWQ 4-bit model (offline)")
             return {}, True  # Load pre-quantized model normally, allow torch_dtype setting
@@ -172,7 +281,7 @@ class UnifiedModelLoader:
                 "quantization_config": bnb_config
             }, False  # INT4 quantization handles torch_dtype internally, don't set it again
         else:
-            raise ValueError(f"Unsupported quantization config: {quantization_config}. Supported: 'int4', 'int8', 'int4_offline_awq'")
+            raise ValueError(f"Unsupported quantization config: {quantization_config}. Supported: 'int4', 'int8', 'int4_awq', 'fp8_e4m3fn'")
 
     def load_transformers_model(
         self,
@@ -187,11 +296,11 @@ class UnifiedModelLoader:
         Args:
             model_path: Model path or ID
             source: Model source, auto means auto-detect
-            quantization_config: Quantization configuration ('int4', 'int8', 'int4_offline_awq', or None for no quantization)
+            quantization_config: Quantization configuration ('int4', 'int8', 'int4_awq', 'fp8_e4m3fn', or None for no quantization)
             **kwargs: Other parameters (torch_dtype, device_map, etc.)
 
         Returns:
-            (model, tokenizer) tuple
+            (model, tokenizer, resolved_path) tuple
         """
         if source == ModelSource.AUTO:
             source = self.detect_model_source(model_path)
@@ -205,47 +314,72 @@ class UnifiedModelLoader:
 
         try:
             if source == ModelSource.LOCAL:
-                # Local loading
-                load_kwargs = {
-                    "device_map": kwargs.get("device_map", "auto"),
-                    "trust_remote_code": True,
-                    "local_files_only": True
-                }
+                # Check if using FP8 custom loader
+                if quantization_kwargs.get("_use_fp8_loader"):
+                    # Load config first for FP8 model
+                    from transformers import AutoConfig
+                    config = AutoConfig.from_pretrained(
+                        model_path,
+                        trust_remote_code=True,
+                        local_files_only=True
+                    )
 
-                # Add quantization configuration if specified
-                load_kwargs.update(quantization_kwargs)
+                    # Use custom FP8 loader
+                    model = self._load_fp8_model(
+                        model_path=model_path,
+                        model_class=AutoModelForCausalLM,
+                        config=config,
+                        device_map=kwargs.get("device_map", "auto")
+                    )
 
-                # Add torch_dtype based on quantization requirements
-                if should_set_torch_dtype and kwargs.get("torch_dtype") is not None:
-                    load_kwargs["torch_dtype"] = kwargs.get("torch_dtype")
-
-                # Check if using AWQ quantization
-                if quantization_config and quantization_config.lower() == "int4_offline_awq":
-                    # Use AWQ loading for pre-quantized AWQ models
-                    if not AWQ_AVAILABLE:
-                        raise ImportError("AWQ quantization requested but 'autoawq' is not installed. Please install with: pip install autoawq")
-
-                    awq_model_path = os.path.join(model_path, "awq_quantized")
-                    if not os.path.exists(awq_model_path):
-                        raise FileNotFoundError(f"AWQ quantized model not found at {awq_model_path}. Please run quantize_model_offline.py first.")
-
-                    self.logger.info(f"🔧 Loading AWQ quantized model from: {awq_model_path}")
-                    model = AutoAWQForCausalLM.from_quantized(
-                        awq_model_path,
-                        device_map=kwargs.get("device_map", "auto"),
-                        trust_remote_code=True
+                    tokenizer = AutoTokenizer.from_pretrained(
+                        model_path,
+                        trust_remote_code=True,
+                        local_files_only=True
                     )
                 else:
-                    # Standard loading
-                    model = AutoModelForCausalLM.from_pretrained(
+                    # Standard loading path for non-FP8
+                    load_kwargs = {
+                        "device_map": kwargs.get("device_map", "auto"),
+                        "trust_remote_code": True,
+                        "local_files_only": True
+                    }
+
+                    # Add quantization configuration if specified
+                    load_kwargs.update(quantization_kwargs)
+
+                    # Add torch_dtype based on quantization requirements
+                    if should_set_torch_dtype and kwargs.get("torch_dtype") is not None:
+                        load_kwargs["torch_dtype"] = kwargs.get("torch_dtype")
+
+                    # Check if using AWQ quantization
+                    if quantization_config and quantization_config.lower() == "int4_offline_awq":
+                        # Use AWQ loading for pre-quantized AWQ models
+                        if not AWQ_AVAILABLE:
+                            raise ImportError("AWQ quantization requested but 'autoawq' is not installed. Please install with: pip install autoawq")
+
+                        awq_model_path = os.path.join(model_path, "awq_quantized")
+                        if not os.path.exists(awq_model_path):
+                            raise FileNotFoundError(f"AWQ quantized model not found at {awq_model_path}. Please run quantize_model_offline.py first.")
+
+                        self.logger.info(f"🔧 Loading AWQ quantized model from: {awq_model_path}")
+                        model = AutoAWQForCausalLM.from_quantized(
+                            awq_model_path,
+                            device_map=kwargs.get("device_map", "auto"),
+                            trust_remote_code=True
+                        )
+                    else:
+                        # Standard loading
+                        model = AutoModelForCausalLM.from_pretrained(
+                            model_path,
+                            **load_kwargs
+                        )
+
+                    tokenizer = AutoTokenizer.from_pretrained(
                         model_path,
-                        **load_kwargs
+                        trust_remote_code=True,
+                        local_files_only=True
                     )
-                tokenizer = AutoTokenizer.from_pretrained(
-                    model_path,
-                    trust_remote_code=True,
-                    local_files_only=True
-                )
 
             elif source == ModelSource.MODELSCOPE:
                 # Load from ModelScope

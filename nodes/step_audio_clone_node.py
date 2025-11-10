@@ -70,9 +70,9 @@ class StepAudioCloneNode:
                     "default": "bfloat16",
                     "tooltip": "Model precision: bfloat16 (best quality, stable, 8GB VRAM), float16 (good quality, 6GB VRAM), float32 (max quality, 16GB VRAM), auto (selects best for your GPU)."
                 }),
-                "quantization": (["none", "int4", "int8", "int4_awq"], {
+                "quantization": (["none", "int4", "int8", "int4_awq", "fp8_e4m3fn"], {
                     "default": "none",
-                    "tooltip": "VRAM reduction: 'none' (best quality, 8GB VRAM), int8 (good quality, 4GB VRAM), int4 (acceptable quality, 3GB VRAM), int4_awq (optimized int4). Use if low on VRAM."
+                    "tooltip": "VRAM reduction: 'none' (best quality, 8GB VRAM), fp8_e4m3fn (excellent quality, ~6GB VRAM, requires pre-quantized model), int8 (good quality, 4GB VRAM), int4 (acceptable quality, 3GB VRAM), int4_awq (optimized int4). Use if low on VRAM."
                 }),
                 "attention_mechanism": (["sdpa", "eager", "flash_attn", "sage_attn"], {
                     "default": "sdpa",
