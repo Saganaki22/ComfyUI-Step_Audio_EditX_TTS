@@ -1,0 +1,30 @@
+# Core dependencies for Step Audio EditX TTS Node
+# Install with: pip install -r requirements.txt
+
+# Audio processing
+librosa>=0.10.2
+soundfile>=0.12.1
+torchaudio>=2.0.0
+onnxruntime>=1.17.0
+
+# Model loading and inference
+# CRITICAL: transformers must be exactly 4.53.3 for correct token generation
+# Newer versions (4.54+) have a tokenization bug that causes silent audio
+transformers==4.53.3
+accelerate>=0.20.0
+sentencepiece>=0.1.99
+
+# Utilities
+omegaconf>=2.3.0
+hyperpyyaml>=1.2.2
+protobuf>=3.20.0
+
+# Whisper (required by tokenizer and frontend)
+openai-whisper>=20231117
+
+# Optional: Quantization support (uncomment if needed)
+# autoawq>=0.2.0
+# bitsandbytes>=0.41.0
+
+# Note: numpy, torch, pillow should already be installed by ComfyUI
+# funasr is NOT required - we use bundled funasr_detach instead

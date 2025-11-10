@@ -1,0 +1,12 @@
+# Step Audio EditX - Paralinguistic Sounds
+# 10 non-verbal sounds for audio editing
+[Breathing]
+[Laughter]
+[Surprise-oh]
+[Confirmation-en]
+[Uhm]
+[Surprise-ah]
+[Surprise-wa]
+[Sigh]
+[Question-ei]
+[Dissatisfaction-hnn]

@@ -1,0 +1,44 @@
+{
+  "presets": [
+    {
+      "id": "professional_male",
+      "emoji": "👔",
+      "name": "Professional Male",
+      "prompt_text": "Hello, thank you for calling. How may I assist you today?",
+      "target_text": "Your text here",
+      "description": "Clear, authoritative male voice suitable for business presentations"
+    },
+    {
+      "id": "friendly_female",
+      "emoji": "😊",
+      "name": "Friendly Female",
+      "prompt_text": "Hi there! I'm so excited to help you with this project.",
+      "target_text": "Your text here",
+      "description": "Warm, approachable female voice for conversational content"
+    },
+    {
+      "id": "narrator",
+      "emoji": "📖",
+      "name": "Narrator",
+      "prompt_text": "In the beginning, there was nothing but endless darkness and silence.",
+      "target_text": "Your text here",
+      "description": "Deep, engaging voice perfect for storytelling and audiobooks"
+    },
+    {
+      "id": "energetic",
+      "emoji": "⚡",
+      "name": "Energetic",
+      "prompt_text": "Let's go! This is going to be absolutely amazing!",
+      "target_text": "Your text here",
+      "description": "High-energy, enthusiastic voice for promotional content"
+    },
+    {
+      "id": "calm_guide",
+      "emoji": "🧘",
+      "name": "Calm Guide",
+      "prompt_text": "Take a deep breath and relax. Everything will be alright.",
+      "target_text": "Your text here",
+      "description": "Soothing, gentle voice for meditation and wellness content"
+    }
+  ]
+}

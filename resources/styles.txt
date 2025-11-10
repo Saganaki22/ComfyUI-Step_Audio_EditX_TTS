@@ -1,0 +1,35 @@
+# Step Audio EditX - Voice Style Tags
+# 33 voice styles for audio editing
+serious
+arrogant
+child
+older
+girl
+pure
+sister
+sweet
+ethereal
+whisper
+gentle
+recite
+generous
+act_coy
+warm
+shy
+comfort
+authority
+chat
+radio
+soulful
+story
+vivid
+program
+news
+advertising
+roar
+murmur
+shout
+deeply
+loudly
+remove
+exaggerated

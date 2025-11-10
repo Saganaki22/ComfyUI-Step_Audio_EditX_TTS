@@ -1,0 +1,17 @@
+# Step Audio EditX - Emotion Tags
+# 15 emotions for audio editing
+happy
+angry
+sad
+humour
+confusion
+disgusted
+empathy
+embarrass
+fear
+surprised
+excited
+depressed
+coldness
+admiration
+remove

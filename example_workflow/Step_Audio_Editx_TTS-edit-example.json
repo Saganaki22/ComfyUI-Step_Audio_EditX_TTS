@@ -1,0 +1,454 @@
+{
+  "id": "bffa21c9-66b2-4b48-b734-e34da20103eb",
+  "revision": 0,
+  "last_node_id": 16,
+  "last_link_id": 28,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "Audio To Text (mtb)",
+      "pos": [
+        841.4862670898438,
+        157.25418090820312
+      ],
+      "size": [
+        270,
+        102
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "WHISPER_PIPELINE",
+          "link": 11
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        },
+        {
+          "name": "WHISPER_OUTPUT",
+          "type": "WHISPER_OUTPUT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-mtb",
+        "ver": "0.5.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "Audio To Text (mtb)"
+      },
+      "widgets_values": [
+        "auto",
+        false
+      ]
+    },
+    {
+      "id": 9,
+      "type": "Load Whisper (mtb)",
+      "pos": [
+        842.1671142578125,
+        310.24896240234375
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pipeline",
+          "type": "WHISPER_PIPELINE",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-mtb",
+        "ver": "0.5.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "Load Whisper (mtb)"
+      },
+      "widgets_values": [
+        "base",
+        false
+      ]
+    },
+    {
+      "id": 12,
+      "type": "easy cleanGpuUsed",
+      "pos": [
+        1156.986572265625,
+        89.88908386230469
+      ],
+      "size": [
+        157.38925170898438,
+        26
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "type": "*",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "easy cleanGpuUsed"
+      }
+    },
+    {
+      "id": 4,
+      "type": "LoadAudio",
+      "pos": [
+        840.4910888671875,
+        -38.36513900756836
+      ],
+      "size": [
+        274.080078125,
+        136
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            12,
+            26
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.68",
+        "Node name for S&R": "LoadAudio",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "audio": true,
+            "audioUI": true,
+            "upload": true
+          },
+          "version": "7.4.1",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "Narrator.wav",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 14,
+      "type": "MarkdownNote",
+      "pos": [
+        829.2308959960938,
+        -560.1124267578125
+      ],
+      "size": [
+        522.9860229492188,
+        426.0777282714844
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Model Download",
+      "properties": {},
+      "widgets_values": [
+        "### 📥 Download Models\n\nDownload **both** the Step-Audio-EditX model and Step-Audio-Tokenizer. They must be in the correct folder structure:\n\n```bash\ncd ComfyUI/models\nmkdir -p Step-Audio-EditX\ncd Step-Audio-EditX\n\n# Download BOTH repositories from HuggingFace\ngit clone https://huggingface.co/stepfun-ai/Step-Audio-EditX\ngit clone https://huggingface.co/stepfun-ai/Step-Audio-Tokenizer\n```\n\n**Required Folder Structure:**\n```\nComfyUI/\n└── models/\n    └── Step-Audio-EditX/\n        ├── Step-Audio-EditX/       ← Main model\n        └── Step-Audio-Tokenizer/   ← Tokenizer (required)\n```\n\nOr download manually from:\n- https://huggingface.co/stepfun-ai/Step-Audio-EditX\n- https://huggingface.co/stepfun-ai/Step-Audio-Tokenizer"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 11,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1128.35107421875,
+        180.11865234375
+      ],
+      "size": [
+        260.8934020996094,
+        195.82931518554688
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "1.2.5",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        " Want to level up your Python skills? Remember to use descriptive variable names, keep function short, and test your code regularly. Good coding practices make debugging a breeze."
+      ]
+    },
+    {
+      "id": 16,
+      "type": "StepAudio_AudioEdit",
+      "pos": [
+        1448.1746826171875,
+        -96.34905242919922
+      ],
+      "size": [
+        400,
+        574
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 26
+        },
+        {
+          "name": "audio_text",
+          "type": "STRING",
+          "widget": {
+            "name": "audio_text"
+          },
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "StepAudio_AudioEdit"
+      },
+      "widgets_values": [
+        "",
+        "Step-Audio-EditX",
+        "cuda",
+        "bfloat16",
+        "none",
+        "sdpa",
+        "emotion",
+        "sad",
+        "none",
+        "none",
+        "none",
+        "none",
+        "",
+        2,
+        0.7,
+        true,
+        2048,
+        0,
+        "randomize",
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveAudioMP3",
+      "pos": [
+        1917.9696044921875,
+        -52.79144287109375
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 27
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.68",
+        "Node name for S&R": "SaveAudioMP3",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "filename_prefix": true,
+            "quality": true,
+            "audioUI": true
+          },
+          "version": "7.4.1",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "audio/ComfyUI",
+        "320k"
+      ]
+    }
+  ],
+  "links": [
+    [
+      11,
+      9,
+      0,
+      10,
+      0,
+      "WHISPER_PIPELINE"
+    ],
+    [
+      12,
+      4,
+      0,
+      10,
+      1,
+      "AUDIO"
+    ],
+    [
+      15,
+      10,
+      0,
+      12,
+      0,
+      "*"
+    ],
+    [
+      16,
+      12,
+      0,
+      11,
+      0,
+      "STRING"
+    ],
+    [
+      26,
+      4,
+      0,
+      16,
+      0,
+      "AUDIO"
+    ],
+    [
+      27,
+      16,
+      0,
+      3,
+      0,
+      "AUDIO"
+    ],
+    [
+      28,
+      11,
+      0,
+      16,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Whisper Transcribe",
+      "bounding": [
+        830.4910888671875,
+        -111.96514129638672,
+        575.1170654296875,
+        521.5494384765625
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8264462809917354,
+      "offset": [
+        -248.4476858592367,
+        683.9325359559252
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "frontendVersion": "1.27.10",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

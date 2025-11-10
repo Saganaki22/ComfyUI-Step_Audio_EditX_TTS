@@ -1,0 +1,798 @@
+{
+  "id": "bffa21c9-66b2-4b48-b734-e34da20103eb",
+  "revision": 0,
+  "last_node_id": 24,
+  "last_link_id": 41,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "Audio To Text (mtb)",
+      "pos": [
+        831.365966796875,
+        -292.08404541015625
+      ],
+      "size": [
+        270,
+        102
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "WHISPER_PIPELINE",
+          "link": 11
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        },
+        {
+          "name": "WHISPER_OUTPUT",
+          "type": "WHISPER_OUTPUT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-mtb",
+        "ver": "0.5.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "Audio To Text (mtb)"
+      },
+      "widgets_values": [
+        "auto",
+        false
+      ]
+    },
+    {
+      "id": 12,
+      "type": "easy cleanGpuUsed",
+      "pos": [
+        1151.365966796875,
+        -362.08404541015625
+      ],
+      "size": [
+        157.38925170898438,
+        26
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "type": "*",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "easy cleanGpuUsed"
+      }
+    },
+    {
+      "id": 14,
+      "type": "MarkdownNote",
+      "pos": [
+        1908.33056640625,
+        -582.1131591796875
+      ],
+      "size": [
+        522.9860229492188,
+        426.0777282714844
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Model Download",
+      "properties": {},
+      "widgets_values": [
+        "### 📥 Download Models\n\nDownload **both** the Step-Audio-EditX model and Step-Audio-Tokenizer. They must be in the correct folder structure:\n\n```bash\ncd ComfyUI/models\nmkdir -p Step-Audio-EditX\ncd Step-Audio-EditX\n\n# Download BOTH repositories from HuggingFace\ngit clone https://huggingface.co/stepfun-ai/Step-Audio-EditX\ngit clone https://huggingface.co/stepfun-ai/Step-Audio-Tokenizer\n```\n\n**Required Folder Structure:**\n```\nComfyUI/\n└── models/\n    └── Step-Audio-EditX/\n        ├── Step-Audio-EditX/       ← Main model\n        └── Step-Audio-Tokenizer/   ← Tokenizer (required)\n```\n\nOr download manually from:\n- https://huggingface.co/stepfun-ai/Step-Audio-EditX\n- https://huggingface.co/stepfun-ai/Step-Audio-Tokenizer"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 21,
+      "type": "easy cleanGpuUsed",
+      "pos": [
+        1119.904296875,
+        110.11160278320312
+      ],
+      "size": [
+        157.38925170898438,
+        26
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "anything",
+          "type": "*",
+          "link": 33
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "*",
+          "links": [
+            34
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "easy cleanGpuUsed"
+      }
+    },
+    {
+      "id": 11,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1121.365966796875,
+        -272.08404541015625
+      ],
+      "size": [
+        260.8934020996094,
+        195.82931518554688
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": [
+            37
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "1.2.5",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        " Want to level up your Python skills? Remember to use descriptive variable names, keep function short, and test your code regularly. Good coding practices make debugging a breeze."
+      ]
+    },
+    {
+      "id": 4,
+      "type": "LoadAudio",
+      "pos": [
+        831.365966796875,
+        -492.0839538574219
+      ],
+      "size": [
+        274.080078125,
+        136
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            12,
+            29
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.68",
+        "Node name for S&R": "LoadAudio",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "audio": true,
+            "audioUI": true,
+            "upload": true
+          },
+          "version": "7.4.1",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "Narrator.wav",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 18,
+      "type": "StepAudio_VoiceClone",
+      "pos": [
+        1440.4176025390625,
+        -618.6991577148438
+      ],
+      "size": [
+        411.5701599121094,
+        465.53717041015625
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 29
+        },
+        {
+          "name": "prompt_text",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt_text"
+          },
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            39
+          ]
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "StepAudio_VoiceClone"
+      },
+      "widgets_values": [
+        "",
+        "And there he was — confidently pressing “Send” before realizing he’d just replied to his boss with a GIF of a dancing llama. Truly, a bold move. Historians would later call it… “the beginning of the end.”",
+        "Step-Audio-EditX",
+        "cuda",
+        "bfloat16",
+        "none",
+        "sdpa",
+        0.7,
+        true,
+        2048,
+        false,
+        1105813937717257,
+        "randomize",
+        true
+      ]
+    },
+    {
+      "id": 16,
+      "type": "StepAudio_AudioEdit",
+      "pos": [
+        1448.1746826171875,
+        -96.34905242919922
+      ],
+      "size": [
+        400,
+        574
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 41
+        },
+        {
+          "name": "audio_text",
+          "type": "STRING",
+          "widget": {
+            "name": "audio_text"
+          },
+          "link": 36
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "StepAudio_AudioEdit"
+      },
+      "widgets_values": [
+        "",
+        "Step-Audio-EditX",
+        "cuda",
+        "bfloat16",
+        "none",
+        "sdpa",
+        "emotion",
+        "sad",
+        "none",
+        "none",
+        "none",
+        "none",
+        "",
+        2,
+        0.7,
+        true,
+        2048,
+        321763300906442,
+        "randomize",
+        true
+      ]
+    },
+    {
+      "id": 19,
+      "type": "Audio To Text (mtb)",
+      "pos": [
+        819.9044189453125,
+        160.11154174804688
+      ],
+      "size": [
+        270,
+        102
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "WHISPER_PIPELINE",
+          "link": 31
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 40
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            33
+          ]
+        },
+        {
+          "name": "WHISPER_OUTPUT",
+          "type": "WHISPER_OUTPUT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-mtb",
+        "ver": "0.5.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "Audio To Text (mtb)"
+      },
+      "widgets_values": [
+        "auto",
+        false
+      ]
+    },
+    {
+      "id": 23,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1117.904296875,
+        194.11154174804688
+      ],
+      "size": [
+        260.8934020996094,
+        195.82931518554688
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": [
+            36
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "1.2.5",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        " and there he was, confidently pressing send before realizing he'd just replied to his boss with a gif of a dancing llama. Truly a bold move. Historians would later call it the beginning of the end."
+      ]
+    },
+    {
+      "id": 24,
+      "type": "Reroute",
+      "pos": [
+        1137.151123046875,
+        -11.219419479370117
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 39
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "AUDIO",
+          "links": [
+            40,
+            41
+          ]
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 20,
+      "type": "Load Whisper (mtb)",
+      "pos": [
+        819.9044189453125,
+        310.1120300292969
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pipeline",
+          "type": "WHISPER_PIPELINE",
+          "links": [
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-mtb",
+        "ver": "0.5.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "Load Whisper (mtb)"
+      },
+      "widgets_values": [
+        "base",
+        true
+      ]
+    },
+    {
+      "id": 9,
+      "type": "Load Whisper (mtb)",
+      "pos": [
+        831.365966796875,
+        -142.08401489257812
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pipeline",
+          "type": "WHISPER_PIPELINE",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-mtb",
+        "ver": "0.5.4",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "Load Whisper (mtb)"
+      },
+      "widgets_values": [
+        "base",
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveAudioMP3",
+      "pos": [
+        1937.704833984375,
+        -25.804805755615234
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 27
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.68",
+        "Node name for S&R": "SaveAudioMP3",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "filename_prefix": true,
+            "quality": true,
+            "audioUI": true
+          },
+          "version": "7.4.1",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "audio/ComfyUI",
+        "320k"
+      ]
+    }
+  ],
+  "links": [
+    [
+      11,
+      9,
+      0,
+      10,
+      0,
+      "WHISPER_PIPELINE"
+    ],
+    [
+      12,
+      4,
+      0,
+      10,
+      1,
+      "AUDIO"
+    ],
+    [
+      15,
+      10,
+      0,
+      12,
+      0,
+      "*"
+    ],
+    [
+      16,
+      12,
+      0,
+      11,
+      0,
+      "STRING"
+    ],
+    [
+      27,
+      16,
+      0,
+      3,
+      0,
+      "AUDIO"
+    ],
+    [
+      29,
+      4,
+      0,
+      18,
+      0,
+      "AUDIO"
+    ],
+    [
+      31,
+      20,
+      0,
+      19,
+      0,
+      "WHISPER_PIPELINE"
+    ],
+    [
+      33,
+      19,
+      0,
+      21,
+      0,
+      "*"
+    ],
+    [
+      34,
+      21,
+      0,
+      23,
+      0,
+      "STRING"
+    ],
+    [
+      36,
+      23,
+      0,
+      16,
+      1,
+      "STRING"
+    ],
+    [
+      37,
+      11,
+      0,
+      18,
+      1,
+      "STRING"
+    ],
+    [
+      39,
+      18,
+      0,
+      24,
+      0,
+      "*"
+    ],
+    [
+      40,
+      24,
+      0,
+      19,
+      1,
+      "AUDIO"
+    ],
+    [
+      41,
+      24,
+      0,
+      16,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Whisper Transcribe",
+      "bounding": [
+        821.365966796875,
+        -562.0840454101562,
+        575.1170654296875,
+        521.5494384765625
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Whisper Transcribe 1",
+      "bounding": [
+        820.9046630859375,
+        68.81156158447266,
+        580.8934326171875,
+        335.6000061035156
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7513148009015777,
+      "offset": [
+        -457.9223215093341,
+        822.5410460398973
+      ]
+    },
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "frontendVersion": "1.27.10",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
