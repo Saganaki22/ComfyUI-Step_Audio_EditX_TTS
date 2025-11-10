@@ -1,2 +1,2 @@
-# ComfyUI-StepAudioX_TTS
+# ComfyUI-Step_Audio_EditX_TTS
 WIP
