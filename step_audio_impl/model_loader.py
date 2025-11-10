@@ -152,7 +152,8 @@ class UnifiedModelLoader:
         if not hasattr(torch, 'float8_e4m3fn'):
             raise RuntimeError("FP8 e4m3fn requires PyTorch 2.1 or later with FP8 support")
 
-        self.logger.info(f"🔧 Loading FP8 e4m3fn quantized model from: {model_path}")
+        # Use print() instead of logger.info() since logging may be suppressed
+        print(f"[StepAudio] 🔧 Loading FP8 e4m3fn quantized model from: {model_path}")
 
         # Load the safetensors index to get metadata
         index_path = os.path.join(model_path, "model.safetensors.index.json")
@@ -173,7 +174,7 @@ class UnifiedModelLoader:
             )
 
         fp8_layers = set(index_data["metadata"]["fp8_layers"])
-        self.logger.info(f"🔧 Found {len(fp8_layers)} FP8 layers in model metadata")
+        print(f"[StepAudio] 🔧 Found {len(fp8_layers)} FP8 layers in model metadata")
 
         # Load all safetensors files
         weight_map = index_data.get("weight_map", {})
@@ -186,10 +187,11 @@ class UnifiedModelLoader:
             if not os.path.exists(st_path):
                 raise FileNotFoundError(f"Safetensors file not found: {st_path}")
 
-            self.logger.info(f"Loading weights from: {st_file}")
+            print(f"[StepAudio] Loading weights from: {st_file}")
             file_state_dict = load_safetensors(st_path)
             state_dict.update(file_state_dict)
 
+        print(f"[StepAudio] 🔧 Converting FP8 layers from uint8 storage...")
         # Convert uint8 FP8 layers back to torch.float8_e4m3fn
         converted_count = 0
         for layer_name in fp8_layers:
@@ -200,33 +202,33 @@ class UnifiedModelLoader:
                 state_dict[layer_name] = fp8_tensor
                 converted_count += 1
 
-        self.logger.info(f"🔧 Converted {converted_count} layers from uint8 to FP8 e4m3fn")
+        print(f"[StepAudio] 🔧 Converted {converted_count} layers from uint8 to FP8 e4m3fn")
 
         # Ensure config has all required attributes for model initialization
         # Add default values for missing attributes that are needed during init
         if not hasattr(config, 'initializer_range'):
             config.initializer_range = 0.02  # Standard default for transformer models
-            self.logger.info(f"🔧 Added missing initializer_range to config")
+            print(f"[StepAudio] 🔧 Added missing initializer_range to config")
 
         # Create model with config using from_config() for AutoModelForCausalLM
-        # Use _fast_init=True to skip weight initialization since we're loading pre-quantized weights
-        self.logger.info(f"🔧 Initializing model architecture (skipping weight init)...")
+        print(f"[StepAudio] 🔧 Initializing model architecture...")
         model = model_class.from_config(config, trust_remote_code=True)
 
         # Load state dict immediately (strict=False to handle missing/unexpected keys gracefully)
-        self.logger.info(f"🔧 Loading FP8 state dict into model...")
+        print(f"[StepAudio] 🔧 Loading FP8 state dict into model...")
         missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
 
         if missing_keys:
-            self.logger.warning(f"Missing keys when loading FP8 model: {missing_keys[:5]}...")
+            print(f"[StepAudio] ⚠️  Missing keys when loading FP8 model: {len(missing_keys)} keys")
         if unexpected_keys:
-            self.logger.warning(f"Unexpected keys when loading FP8 model: {unexpected_keys[:5]}...")
+            print(f"[StepAudio] ⚠️  Unexpected keys when loading FP8 model: {len(unexpected_keys)} keys")
 
         # Move to device if specified
         if device_map != "auto":
+            print(f"[StepAudio] Moving model to {device_map}...")
             model = model.to(device_map)
 
-        self.logger.info(f"✅ Successfully loaded FP8 e4m3fn model")
+        print(f"[StepAudio] ✅ Successfully loaded FP8 e4m3fn model")
         return model
 
     def _prepare_quantization_config(self, quantization_config: Optional[str], torch_dtype: Optional[torch.dtype] = None) -> Tuple[Dict[str, Any], bool]:
