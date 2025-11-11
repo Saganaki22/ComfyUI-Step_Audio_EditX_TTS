@@ -97,16 +97,16 @@ Or download manually from:
 |------|-----------|--------------|------------|
 | Clone | bfloat16 | none | ~11-14GB |
 | Edit | bfloat16 | none | ~14-18GB |
-| Clone | bfloat16 | fp8_e4m3fn | ~6-8GB |
-| Edit | bfloat16 | fp8_e4m3fn | ~8-10GB |
 | Clone | float16 | int8 | ~5-7GB |
 | Edit | float16 | int8 | ~7-9GB |
+| Clone | float16 | int4 | ~3-5GB |
+| Edit | float16 | int4 | ~5-7GB |
 
 **Note**: Edit node uses more VRAM than clone node.
 
 **Recommendations**:
 - **RTX 4090/A6000+**: Use bfloat16 + no quantization for best quality
-- **RTX 3090/4080**: Use bfloat16 + fp8_e4m3fn quantization (excellent quality, requires pre-quantized model)
+- **RTX 3090/4080**: Use bfloat16 or float16 + int8 quantization for balanced quality/VRAM
 - **RTX 3060/4060**: Use float16 + int8 quantization
 - **Lower VRAM**: Use int4 quantization (quality trade-off)
 
@@ -315,43 +315,9 @@ n_edit_iterations: 1
 ### Quantization
 
 - **none**: Best quality, highest VRAM usage (~11-14GB)
-- **fp8_e4m3fn**: Excellent quality, medium VRAM (~6-8GB), requires pre-quantized FP8 model (see FP8 Quantization section below)
 - **int8**: Good quality, medium VRAM (~5-7GB), recommended for VRAM-constrained systems
 - **int4**: Acceptable quality, low VRAM (~3-5GB), noticeable quality loss
-- **int4_awq**: Optimized int4 quantization, slightly better than standard int4
-
-#### FP8 Quantization (fp8_e4m3fn)
-
-FP8 e4m3fn quantization provides excellent quality-to-VRAM ratio but requires **offline pre-quantization** of your model:
-
-**Requirements:**
-- PyTorch 2.1+ with FP8 support
-- Pre-quantized model in FP8 e4m3fn format with proper metadata
-
-**Loading FP8 Models:**
-1. Place your FP8-quantized model folder in `ComfyUI/models/Step-Audio-EditX/`
-2. Set `quantization: "fp8_e4m3fn"` in the node
-3. Set `torch_dtype: "bfloat16"` or `"auto"`
-4. The node will automatically detect and load FP8 weights from safetensors
-
-**FP8 Model Format:**
-Your quantized model must have:
-- `model.safetensors.index.json` with `metadata.fp8_layers` list
-- FP8 layers stored as uint8 (automatically converted to torch.float8_e4m3fn on load)
-- FP16/BF16 layers for embeddings and layer norms
-
-**Example structure:**
-```
-ComfyUI/models/Step-Audio-EditX/
-└── Step-Audio-EditX-FP8/
-    ├── config.json
-    ├── model.safetensors.index.json  # Contains fp8_layers metadata
-    ├── model-00001.safetensors       # FP8 weights as uint8
-    ├── tokenizer_config.json
-    └── ...
-```
-
-If you've quantized your own model to FP8 e4m3fn, no other options need to be changed - just select `fp8_e4m3fn` for quantization!
+- **int4_awq**: Optimized int4 quantization, slightly better than standard int4, requires pre-quantized model
 
 ### Attention Mechanism
 
