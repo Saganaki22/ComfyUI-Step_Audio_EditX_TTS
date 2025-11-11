@@ -14,6 +14,13 @@ from tts import StepAudioTTS
 from model_loader import ModelSource
 from config.edit_config import get_supported_edit_types
 
+# Set torchaudio backend for reliable BytesIO operations
+# Fixes "Couldn't allocate AVFormatContext" error in Gradio audio display
+try:
+    torchaudio.set_audio_backend("soundfile")
+except Exception:
+    pass  # Fallback to default backend if soundfile not available
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
