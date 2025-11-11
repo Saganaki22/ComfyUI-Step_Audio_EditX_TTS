@@ -2,6 +2,7 @@
 Unified model loading utility supporting ModelScope, HuggingFace and local path loading
 """
 import os
+import json
 import logging
 import threading
 from typing import Optional, Dict, Any, Tuple
@@ -118,6 +119,7 @@ class UnifiedModelLoader:
         modelscope_patterns = []
         return any(pattern in model_path for pattern in modelscope_patterns)
 
+
     def _prepare_quantization_config(self, quantization_config: Optional[str], torch_dtype: Optional[torch.dtype] = None) -> Tuple[Dict[str, Any], bool]:
         """
         Prepare quantization configuration for model loading
@@ -191,7 +193,7 @@ class UnifiedModelLoader:
             **kwargs: Other parameters (torch_dtype, device_map, etc.)
 
         Returns:
-            (model, tokenizer) tuple
+            (model, tokenizer, resolved_path) tuple
         """
         if source == ModelSource.AUTO:
             source = self.detect_model_source(model_path)
@@ -205,7 +207,7 @@ class UnifiedModelLoader:
 
         try:
             if source == ModelSource.LOCAL:
-                # Local loading
+                # Standard loading path
                 load_kwargs = {
                     "device_map": kwargs.get("device_map", "auto"),
                     "trust_remote_code": True,
@@ -241,6 +243,7 @@ class UnifiedModelLoader:
                         model_path,
                         **load_kwargs
                     )
+
                 tokenizer = AutoTokenizer.from_pretrained(
                     model_path,
                     trust_remote_code=True,
