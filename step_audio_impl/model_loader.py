@@ -204,6 +204,11 @@ class UnifiedModelLoader:
 
         print(f"[StepAudio] 🔧 Converted {converted_count} layers from uint8 to FP8 e4m3fn")
 
+        # Check actual dtypes in state dict
+        fp8_count = sum(1 for t in state_dict.values() if t.dtype == torch.float8_e4m3fn)
+        fp16_count = sum(1 for t in state_dict.values() if t.dtype in (torch.float16, torch.bfloat16))
+        print(f"[StepAudio] State dict dtypes: {fp8_count} FP8 tensors, {fp16_count} FP16/BF16 tensors")
+
         # Ensure config has all required attributes for model initialization
         # Add default values for missing attributes that are needed during init
         if not hasattr(config, 'initializer_range'):
@@ -211,12 +216,27 @@ class UnifiedModelLoader:
             print(f"[StepAudio] 🔧 Added missing initializer_range to config")
 
         # Create model with config using from_config() for AutoModelForCausalLM
-        print(f"[StepAudio] 🔧 Initializing model architecture...")
+        print(f"[StepAudio] 🔧 Initializing model architecture (this may take a while)...")
+        import time
+        start_time = time.time()
         model = model_class.from_config(config, trust_remote_code=True)
+        init_time = time.time() - start_time
+        print(f"[StepAudio] Model initialization took {init_time:.1f}s")
 
         # Load state dict immediately (strict=False to handle missing/unexpected keys gracefully)
         print(f"[StepAudio] 🔧 Loading FP8 state dict into model...")
+        start_time = time.time()
         missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
+        load_time = time.time() - start_time
+        print(f"[StepAudio] State dict loading took {load_time:.1f}s")
+
+        # Check actual dtypes in loaded model
+        model_dtypes = {}
+        for name, param in model.named_parameters():
+            dtype_name = str(param.dtype).replace('torch.', '')
+            model_dtypes[dtype_name] = model_dtypes.get(dtype_name, 0) + 1
+        print(f"[StepAudio] ⚠️  Model parameter dtypes after loading: {model_dtypes}")
+        print(f"[StepAudio] ⚠️  WARNING: If no FP8 dtypes above, weights were converted to FP16/BF16!")
 
         if missing_keys:
             print(f"[StepAudio] ⚠️  Missing keys when loading FP8 model: {len(missing_keys)} keys")
