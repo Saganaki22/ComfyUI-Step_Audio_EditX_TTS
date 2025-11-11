@@ -10,6 +10,16 @@ Features:
 - 24kHz output with CosyVoice vocoder
 """
 
+# Fix for ComfyUI audio preview BytesIO error
+# Some systems have ffmpeg/sox backends that fail on BytesIO operations
+# Force soundfile backend for reliable BytesIO support
+try:
+    import torchaudio
+    torchaudio.set_audio_backend("soundfile")
+except Exception:
+    # Silently continue if soundfile not available
+    pass
+
 from .nodes import StepAudioCloneNode, StepAudioEditNode
 
 # Node mappings for ComfyUI
