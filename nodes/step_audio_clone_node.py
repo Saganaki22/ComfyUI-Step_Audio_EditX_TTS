@@ -212,7 +212,7 @@ class StepAudioCloneNode:
         # VRAM management
         if not keep_model_in_vram:
             print(f"[StepAudio] 🧹 Clearing VRAM (keep_model_in_vram=False)...")
-            StepAudioModelManager.clear_cache(keep_tokenizer=True)
+            StepAudioModelManager.clear_cache(keep_tokenizer=False)
 
             import time
             time.sleep(1.0)  # Give CUDA time to release memory
