@@ -14,6 +14,13 @@ from funasr_detach import AutoModel
 from step_audio_utils import resample_audio, energy_norm_fn, trim_silence
 from model_loader import model_loader, ModelSource
 
+# Set torchaudio backend for reliable BytesIO operations in containerized environments
+# Fixes "Couldn't allocate AVFormatContext" error
+try:
+    torchaudio.set_audio_backend("soundfile")
+except Exception:
+    pass  # Fallback to default backend if soundfile not available
+
 # Suppress ONNX Runtime warnings
 onnxruntime.set_default_logger_severity(3)  # 3 = ERROR level
 
