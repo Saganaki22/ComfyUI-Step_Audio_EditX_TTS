@@ -3,6 +3,8 @@
 
 # Audio processing
 librosa>=0.10.2
+# CRITICAL: soundfile is required for containerized/headless environments (RunPod, Docker, etc.)
+# Without soundfile, torchaudio falls back to torchcodec which doesn't support BytesIO properly
 soundfile>=0.12.1
 torchaudio>=2.0.0
 onnxruntime>=1.17.0
@@ -29,3 +31,4 @@ openai-whisper>=20231117
 
 # Note: numpy, torch, pillow should already be installed by ComfyUI
 # funasr is NOT required - we use bundled funasr_detach instead
+# torchcodec is NOT required - soundfile handles all audio I/O
