@@ -37,7 +37,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 #WEB_DIRECTORY = "./js"
 
 # Version
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 # Print banner on load
 print("=" * 90)

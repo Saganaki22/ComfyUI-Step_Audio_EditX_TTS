@@ -15,6 +15,13 @@ from http import HTTPStatus
 
 import torchaudio
 
+# Set torchaudio backend for reliable BytesIO operations in containerized environments
+# Fixes "Couldn't allocate AVFormatContext" error
+try:
+    torchaudio.set_audio_backend("soundfile")
+except Exception:
+    pass  # Fallback to default backend if soundfile not available
+
 from model_loader import model_loader, ModelSource
 from config.prompts import AUDIO_EDIT_CLONE_SYSTEM_PROMPT_TPL, AUDIO_EDIT_SYSTEM_PROMPT
 from stepvocoder.cosyvoice2.cli.cosyvoice import CosyVoice
@@ -646,4 +653,3 @@ class StepAudioTTS:
         hasher.update(audio_sample.tobytes())
         voice_hash = hasher.hexdigest()[:16]
         return f"clone_{voice_hash}"
-    
