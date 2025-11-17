@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-step-audio-editx-tts"
 description = "Professional voice cloning and audio editing node for ComfyUI using Step Audio EditX"
-version = "1.0.5"
+version = "1.0.6"
 license = {text = "Apache-2.0"}
 dependencies = [
     "torch>=2.0.0",

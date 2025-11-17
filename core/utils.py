@@ -8,7 +8,7 @@ import sys
 import json
 import tempfile
 import torch
-import torchaudio
+import soundfile as sf
 import numpy as np
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Any
@@ -136,6 +136,7 @@ def load_json_resource(filename: str) -> Dict:
 def comfyui_audio_to_filepath(audio_data: Dict[str, Any], prefix: str = "step_audio") -> str:
     """
     Convert ComfyUI AUDIO format to a temporary WAV file.
+    Uses soundfile directly to avoid torchaudio backend issues in containers.
 
     Args:
         audio_data: Dictionary with 'waveform' (torch.Tensor) and 'sample_rate' (int)
@@ -162,8 +163,10 @@ def comfyui_audio_to_filepath(audio_data: Dict[str, Any], prefix: str = "step_au
         temp_fd, temp_path = tempfile.mkstemp(suffix=".wav", prefix=f"{prefix}_")
         os.close(temp_fd)
 
-        # Save as WAV
-        torchaudio.save(temp_path, waveform, sample_rate)
+        # CRITICAL FIX: Use soundfile directly instead of torchaudio
+        # This bypasses torchaudio's backend selection issues in containers
+        waveform_np = waveform.numpy().T  # soundfile expects [samples, channels]
+        sf.write(temp_path, waveform_np, sample_rate)
 
         return temp_path
 
@@ -182,7 +185,13 @@ def filepath_to_comfyui_audio(filepath: str) -> Dict[str, Any]:
         Dictionary with 'waveform' (torch.Tensor [1, channels, samples]) and 'sample_rate' (int)
     """
     try:
-        waveform, sample_rate = torchaudio.load(filepath)
+        # CRITICAL FIX: Use soundfile directly instead of torchaudio
+        # This bypasses torchaudio's backend selection issues in containers
+        waveform_np, sample_rate = sf.read(filepath)
+        if waveform_np.ndim == 1:
+            waveform = torch.from_numpy(waveform_np).unsqueeze(0).float()  # [samples] -> [1, samples]
+        else:
+            waveform = torch.from_numpy(waveform_np.T).float()  # [samples, channels] -> [channels, samples]
 
         # Ensure waveform is 3D [batch, channels, samples]
         if waveform.dim() == 2:

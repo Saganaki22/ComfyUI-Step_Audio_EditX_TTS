@@ -2,8 +2,10 @@ import os
 import io
 import torch
 import numpy as np
-import torchaudio
+import soundfile as sf
+import librosa
 from torch.nn.utils.rnn import pad_sequence
+
 
 try:
     from funasr_detach.download.file import download_from_url
@@ -57,16 +59,24 @@ def load_audio_text_image_video(
         data_or_path_or_list = download_from_url(data_or_path_or_list)
 
     if isinstance(data_or_path_or_list, io.BytesIO):
-        data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
-        if kwargs.get("reduce_channels", True):
-            data_or_path_or_list = data_or_path_or_list.mean(0)
+        # Reset BytesIO position to beginning
+        data_or_path_or_list.seek(0)
+        data_or_path_or_list, audio_fs = sf.read(data_or_path_or_list)
+        data_or_path_or_list = torch.from_numpy(data_or_path_or_list).float()
+        if kwargs.get("reduce_channels", True) and len(data_or_path_or_list.shape) > 1:
+            data_or_path_or_list = data_or_path_or_list.mean(1)
+        else:
+            data_or_path_or_list = data_or_path_or_list.squeeze()
     elif isinstance(data_or_path_or_list, str) and os.path.exists(
         data_or_path_or_list
     ):  # local file
         if data_type is None or data_type == "sound":
-            data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
-            if kwargs.get("reduce_channels", True):
-                data_or_path_or_list = data_or_path_or_list.mean(0)
+            data_or_path_or_list, audio_fs = sf.read(data_or_path_or_list)
+            data_or_path_or_list = torch.from_numpy(data_or_path_or_list).float()
+            if kwargs.get("reduce_channels", True) and len(data_or_path_or_list.shape) > 1:
+                data_or_path_or_list = data_or_path_or_list.mean(1)
+            else:
+                data_or_path_or_list = data_or_path_or_list.squeeze()
         elif data_type == "text" and tokenizer is not None:
             data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
         elif data_type == "image":  # undo
@@ -93,8 +103,15 @@ def load_audio_text_image_video(
         # print(f"unsupport data type: {data_or_path_or_list}, return raw data")
 
     if audio_fs != fs and data_type != "text":
-        resampler = torchaudio.transforms.Resample(audio_fs, fs)
-        data_or_path_or_list = resampler(data_or_path_or_list[None, :])[0, :]
+        # Convert to numpy for librosa resampling
+        if isinstance(data_or_path_or_list, torch.Tensor):
+            data_numpy = data_or_path_or_list.cpu().numpy()
+        else:
+            data_numpy = data_or_path_or_list
+
+        # Resample using librosa
+        data_numpy = librosa.resample(data_numpy, orig_sr=audio_fs, target_sr=fs)
+        data_or_path_or_list = torch.from_numpy(data_numpy).float()
     return data_or_path_or_list
 
 

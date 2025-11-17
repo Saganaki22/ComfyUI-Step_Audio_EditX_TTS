@@ -4,10 +4,10 @@ import torch
 import logging
 import concurrent.futures
 import librosa
+import soundfile as sf
 import torch.distributed as dist
 from typing import Collection
 import torch
-import torchaudio
 from torch import nn
 import random
 import re
@@ -28,10 +28,21 @@ class SpeechPreprocessSpeedPerturb(nn.Module):
         if speed != 1.0:
             if not isinstance(waveform, torch.Tensor):
                 waveform = torch.tensor(waveform)
-            waveform, _ = torchaudio.sox_effects.apply_effects_tensor(
-                waveform.view(1, -1), fs, [["speed", str(speed)], ["rate", str(fs)]]
-            )
-            waveform = waveform.view(-1)
+
+            # Convert to numpy for librosa processing
+            if isinstance(waveform, torch.Tensor):
+                waveform_np = waveform.cpu().numpy()
+            else:
+                waveform_np = waveform
+
+            # Resample using librosa to change speed (equivalent to speed perturbation)
+            new_fs = int(fs * speed)
+            waveform_np = librosa.resample(waveform_np, orig_sr=fs, target_sr=new_fs)
+
+            # Resample back to original sample rate
+            waveform_np = librosa.resample(waveform_np, orig_sr=new_fs, target_sr=fs)
+
+            waveform = torch.from_numpy(waveform_np).float()
 
         return waveform
 

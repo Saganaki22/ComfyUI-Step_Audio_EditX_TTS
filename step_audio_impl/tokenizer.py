@@ -6,20 +6,13 @@ import logging
 
 import numpy as np
 import torch
-import torchaudio
+import soundfile as sf
 import onnxruntime
 import whisper
 
 from funasr_detach import AutoModel
 from step_audio_utils import resample_audio, energy_norm_fn, trim_silence
 from model_loader import model_loader, ModelSource
-
-# Set torchaudio backend for reliable BytesIO operations in containerized environments
-# Fixes "Couldn't allocate AVFormatContext" error
-try:
-    torchaudio.set_audio_backend("soundfile")
-except Exception:
-    pass  # Fallback to default backend if soundfile not available
 
 # Suppress ONNX Runtime warnings
 onnxruntime.set_default_logger_severity(3)  # 3 = ERROR level
@@ -135,7 +128,10 @@ class StepAudioTokenizer:
 
     def get_vq02_code(self, audio, session_id=None, is_final=True):
         _tmp_wav = io.BytesIO()
-        torchaudio.save(_tmp_wav, audio, 16000, format="wav")
+        # CRITICAL FIX: Use soundfile directly instead of torchaudio for BytesIO
+        # This bypasses torchaudio's backend selection issues in containers
+        audio_np = audio.cpu().numpy().T  # soundfile expects [samples, channels]
+        sf.write(_tmp_wav, audio_np, 16000, format='wav')
         _tmp_wav.seek(0)
 
         with self.vq02_lock:

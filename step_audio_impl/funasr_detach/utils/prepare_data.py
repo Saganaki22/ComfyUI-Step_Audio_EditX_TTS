@@ -6,8 +6,9 @@ from multiprocessing import Pool
 import kaldiio
 import numpy as np
 import librosa
+import soundfile as sf
 import torch.distributed as dist
-import torchaudio
+
 
 
 def filter_wav_text(data_dir, dataset):
@@ -47,7 +48,12 @@ def filter_wav_text(data_dir, dataset):
 
 def wav2num_frame(wav_path, frontend_conf):
     try:
-        waveform, sampling_rate = torchaudio.load(wav_path)
+        waveform, sampling_rate = sf.read(wav_path)
+        waveform = torch.from_numpy(waveform).float()
+        if len(waveform.shape) > 1:
+            waveform = waveform.mean(1)
+        else:
+            waveform = waveform.squeeze()
     except:
         waveform, sampling_rate = librosa.load(wav_path)
         waveform = np.expand_dims(waveform, axis=0)

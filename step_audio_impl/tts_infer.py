@@ -11,6 +11,13 @@ import torchaudio
 import librosa
 import soundfile as sf
 
+# Set torchaudio backend for reliable BytesIO operations in containerized environments
+# Fixes "Couldn't allocate AVFormatContext" error
+try:
+    torchaudio.set_audio_backend("soundfile")
+except Exception:
+    pass  # Fallback to default backend if soundfile not available
+
 # Project imports
 from tokenizer import StepAudioTokenizer
 from tts import StepAudioTTS

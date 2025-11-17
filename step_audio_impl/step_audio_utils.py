@@ -7,13 +7,16 @@ import math
 import os
 import threading
 import torch
-import torchaudio
+import soundfile as sf
 import tempfile
 
 
 def encode_wav(wav, sr, rep_format="wav"):
     with io.BytesIO() as wavio:
-        torchaudio.save(wavio, wav, sr, format=rep_format)
+        # CRITICAL FIX: Use soundfile directly instead of torchaudio
+        # This bypasses torchaudio's backend selection issues in containers
+        wav_np = wav.cpu().numpy().T  # soundfile expects [samples, channels]
+        sf.write(wavio, wav_np, sr, format=rep_format)
         audio_bytes = wavio.getvalue()
         encoded_wav = base64.b64encode(audio_bytes).decode("ascii")
     return encoded_wav
@@ -83,9 +86,11 @@ def speech_adjust(audio16bit_torch, sr, speed_ratio):
 
 
 def audio_resample(audio16bit_torch, result_sr, target_sample_rate):
-    audio16bit_torch = torchaudio.transforms.Resample(
-        orig_freq=result_sr, new_freq=target_sample_rate
-    )(audio16bit_torch)
+    # CRITICAL FIX: Use librosa.resample instead of torchaudio
+    # This bypasses torchaudio's backend selection issues in containers
+    audio_np = audio16bit_torch.squeeze(0).cpu().numpy()
+    audio_resampled = librosa.resample(audio_np, orig_sr=result_sr, target_sr=target_sample_rate)
+    audio16bit_torch = torch.from_numpy(audio_resampled).unsqueeze(0).to(audio16bit_torch.device)
     result_sr = target_sample_rate
     return audio16bit_torch, result_sr
 
@@ -107,9 +112,11 @@ def resample_audio(wav, original_sample_rate, target_sample_rate):
         ), "wav sample rate {} must be greater than {}".format(
             original_sample_rate, target_sample_rate
         )
-        wav = torchaudio.transforms.Resample(
-            orig_freq=original_sample_rate, new_freq=target_sample_rate
-        )(wav)
+        # CRITICAL FIX: Use librosa.resample instead of torchaudio
+        # This bypasses torchaudio's backend selection issues in containers
+        wav_np = wav.squeeze(0).cpu().numpy()
+        wav_resampled = librosa.resample(wav_np, orig_sr=original_sample_rate, target_sr=target_sample_rate)
+        wav = torch.from_numpy(wav_resampled).unsqueeze(0).to(wav.device)
     return wav
 
 
@@ -133,8 +140,14 @@ def get_audio_tokens(audio_tokens: str) -> list[int]:
 
 
 def load_audio(audio_path: str):
-    audio_wav, sr = torchaudio.load(audio_path)
-    audio_wav = audio_wav.mean(dim=0, keepdim=True)
+    # CRITICAL FIX: Use soundfile directly instead of torchaudio
+    # This bypasses torchaudio's backend selection issues in containers
+    waveform_np, sr = sf.read(audio_path)
+    if waveform_np.ndim == 1:
+        audio_wav = torch.from_numpy(waveform_np).unsqueeze(0).float()  # [samples] -> [1, samples]
+    else:
+        audio_wav = torch.from_numpy(waveform_np.T).float()  # [samples, channels] -> [channels, samples]
+        audio_wav = audio_wav.mean(dim=0, keepdim=True)
     return audio_wav, sr
 
 
