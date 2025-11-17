@@ -189,9 +189,9 @@ def filepath_to_comfyui_audio(filepath: str) -> Dict[str, Any]:
         # This bypasses torchaudio's backend selection issues in containers
         waveform_np, sample_rate = sf.read(filepath)
         if waveform_np.ndim == 1:
-            waveform = torch.from_numpy(waveform_np).unsqueeze(0)  # [samples] -> [1, samples]
+            waveform = torch.from_numpy(waveform_np).unsqueeze(0).float()  # [samples] -> [1, samples]
         else:
-            waveform = torch.from_numpy(waveform_np.T)  # [samples, channels] -> [channels, samples]
+            waveform = torch.from_numpy(waveform_np.T).float()  # [samples, channels] -> [channels, samples]
 
         # Ensure waveform is 3D [batch, channels, samples]
         if waveform.dim() == 2:
