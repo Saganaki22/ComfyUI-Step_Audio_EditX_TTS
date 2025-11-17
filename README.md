@@ -26,7 +26,6 @@
   <em>Advanced workflow using Whisper, Clone + Edit</em>
 </p>
 
-
 <br>
 
 Native ComfyUI nodes for **Step Audio EditX** - State-of-the-art zero-shot voice cloning and audio editing with emotion, style, speed control, and more.
@@ -192,6 +191,8 @@ max_new_tokens: 4096
 
 Edit existing audio with emotion, style, speed, paralinguistic effects, or denoising while preserving voice identity.
 
+**⚠️ IMPORTANT LIMITATION**: The Edit node **does not work** with audio longer than 30 seconds. Audio must be between 0.5-30 seconds in length. For longer audio, you must split it into smaller segments before editing.
+
 **Edit Types**:
 - **Emotion**: happy, sad, angry, excited, calm, fearful, surprised, disgusted
 - **Style**: whisper, gentle, serious, casual, formal, friendly
@@ -203,7 +204,7 @@ Edit existing audio with emotion, style, speed, paralinguistic effects, or denoi
 
 #### Text & Audio Inputs
 - **audio_text**: Exact transcript of input audio
-- **input_audio**: Audio to edit (0.5-30 seconds)
+- **input_audio**: Audio to edit **(MUST be 0.5-30 seconds - longer audio will not work)**
 
 #### Model Configuration
 Same as Clone Node (model_path, device, torch_dtype, quantization, attention_mechanism)
@@ -289,7 +290,7 @@ n_edit_iterations: 1
 
 ### Edit Audio Emotion
 
-1. Load source audio to edit
+1. Load source audio to edit **(ensure it's under 30 seconds)**
 2. Add **Step Audio Edit Node**
 3. Connect audio to `input_audio`
 4. Enter exact transcript in `audio_text`
@@ -301,9 +302,10 @@ n_edit_iterations: 1
 ### Clone + Edit Pipeline
 
 1. Use **Clone Node** to generate speech in target voice
-2. Connect clone output to **Edit Node** input
-3. Apply emotion/style edits to the cloned voice
-4. Fine-tune with multiple iterations for stronger effects
+2. **If the cloned audio is longer than 30 seconds, you must split it into smaller segments first**
+3. Connect clone output to **Edit Node** input (ensure segment is ≤30s)
+4. Apply emotion/style edits to the cloned voice
+5. Fine-tune with multiple iterations for stronger effects
 
 ---
 
@@ -383,6 +385,13 @@ n_edit_iterations: 1
 3. Verify you selected correct edit category option (not "none")
 4. Try combining multiple edit passes for cumulative effects
 
+### Edit Node Not Working / Errors
+
+1. **Check audio length**: The Edit node requires audio between 0.5-30 seconds. Audio longer than 30 seconds will fail.
+2. Split longer audio into smaller segments before editing
+3. Ensure `audio_text` matches input audio transcript exactly
+4. Verify the correct edit type is selected
+
 ### Model Not Loading
 
 1. Check model path: `ComfyUI/models/Step-Audio-EditX/`
@@ -447,3 +456,4 @@ Contributions welcome! Please open issues for bugs or feature requests on our [G
 - **Iterations**: For edits, start with 2 iterations and increase if needed
 - **VRAM**: Monitor usage and adjust quantization settings accordingly
 - **Long Content**: Enable chunking for texts over 2000 words for best results
+- **Edit Node Audio Length**: Keep audio under 30 seconds for the Edit node - split longer audio into segments first
