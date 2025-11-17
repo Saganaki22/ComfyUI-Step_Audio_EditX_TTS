@@ -6,15 +6,8 @@ from multiprocessing import Pool
 import kaldiio
 import numpy as np
 import librosa
+import soundfile as sf
 import torch.distributed as dist
-import torchaudio
-
-# Set torchaudio backend for reliable BytesIO operations in containerized environments
-# Fixes "Couldn't allocate AVFormatContext" error
-try:
-    torchaudio.set_audio_backend("soundfile")
-except Exception:
-    pass  # Fallback to default backend if soundfile not available
 
 
 def filter_wav_text(data_dir, dataset):
@@ -53,8 +46,13 @@ def filter_wav_text(data_dir, dataset):
 
 
 def wav2num_frame(wav_path, frontend_conf):
+    # CRITICAL FIX: Use soundfile directly instead of torchaudio
     try:
-        waveform, sampling_rate = torchaudio.load(wav_path)
+        waveform_np, sampling_rate = sf.read(wav_path)
+        if waveform_np.ndim == 1:
+            waveform = np.expand_dims(waveform_np, axis=0)
+        else:
+            waveform = waveform_np.T
     except:
         waveform, sampling_rate = librosa.load(wav_path)
         waveform = np.expand_dims(waveform, axis=0)
