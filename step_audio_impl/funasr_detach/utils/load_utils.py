@@ -5,6 +5,13 @@ import numpy as np
 import torchaudio
 from torch.nn.utils.rnn import pad_sequence
 
+# Set torchaudio backend for reliable BytesIO operations in containerized environments
+# Fixes "Couldn't allocate AVFormatContext" error
+try:
+    torchaudio.set_audio_backend("soundfile")
+except Exception:
+    pass  # Fallback to default backend if soundfile not available
+
 try:
     from funasr_detach.download.file import download_from_url
 except:
