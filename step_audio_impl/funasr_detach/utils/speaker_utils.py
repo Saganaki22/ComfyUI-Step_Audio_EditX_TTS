@@ -4,7 +4,7 @@
 import io
 from typing import Union
 
-import librosa as sf
+import soundfile as sf
 import numpy as np
 import torch
 import torch.nn.functional as F
