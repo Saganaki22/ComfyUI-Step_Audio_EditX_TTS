@@ -2,15 +2,9 @@ import os
 import io
 import torch
 import numpy as np
-import torchaudio
+import soundfile as sf
+import librosa
 from torch.nn.utils.rnn import pad_sequence
-
-# Set torchaudio backend for reliable BytesIO operations in containerized environments
-# Fixes "Couldn't allocate AVFormatContext" error
-try:
-    torchaudio.set_audio_backend("soundfile")
-except Exception:
-    pass  # Fallback to default backend if soundfile not available
 
 try:
     from funasr_detach.download.file import download_from_url
@@ -64,14 +58,24 @@ def load_audio_text_image_video(
         data_or_path_or_list = download_from_url(data_or_path_or_list)
 
     if isinstance(data_or_path_or_list, io.BytesIO):
-        data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+        # CRITICAL FIX: Use soundfile directly instead of torchaudio for BytesIO
+        waveform_np, audio_fs = sf.read(data_or_path_or_list)
+        if waveform_np.ndim == 1:
+            data_or_path_or_list = torch.from_numpy(waveform_np).float()
+        else:
+            data_or_path_or_list = torch.from_numpy(waveform_np.T).float()
         if kwargs.get("reduce_channels", True):
             data_or_path_or_list = data_or_path_or_list.mean(0)
     elif isinstance(data_or_path_or_list, str) and os.path.exists(
         data_or_path_or_list
     ):  # local file
         if data_type is None or data_type == "sound":
-            data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+            # CRITICAL FIX: Use soundfile directly instead of torchaudio
+            waveform_np, audio_fs = sf.read(data_or_path_or_list)
+            if waveform_np.ndim == 1:
+                data_or_path_or_list = torch.from_numpy(waveform_np).float()
+            else:
+                data_or_path_or_list = torch.from_numpy(waveform_np.T).float()
             if kwargs.get("reduce_channels", True):
                 data_or_path_or_list = data_or_path_or_list.mean(0)
         elif data_type == "text" and tokenizer is not None:
@@ -100,8 +104,10 @@ def load_audio_text_image_video(
         # print(f"unsupport data type: {data_or_path_or_list}, return raw data")
 
     if audio_fs != fs and data_type != "text":
-        resampler = torchaudio.transforms.Resample(audio_fs, fs)
-        data_or_path_or_list = resampler(data_or_path_or_list[None, :])[0, :]
+        # CRITICAL FIX: Use librosa for resampling instead of torchaudio
+        data_np = data_or_path_or_list.cpu().numpy()
+        data_np = librosa.resample(data_np, orig_sr=audio_fs, target_sr=fs)
+        data_or_path_or_list = torch.from_numpy(data_np).float()
     return data_or_path_or_list
 
 
