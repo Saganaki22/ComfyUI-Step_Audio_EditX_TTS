@@ -10,6 +10,7 @@ import soundfile as sf
 import torch.distributed as dist
 
 
+
 def filter_wav_text(data_dir, dataset):
     wav_file = os.path.join(data_dir, dataset, "wav.scp")
     text_file = os.path.join(data_dir, dataset, "text")
@@ -46,13 +47,13 @@ def filter_wav_text(data_dir, dataset):
 
 
 def wav2num_frame(wav_path, frontend_conf):
-    # CRITICAL FIX: Use soundfile directly instead of torchaudio
     try:
-        waveform_np, sampling_rate = sf.read(wav_path)
-        if waveform_np.ndim == 1:
-            waveform = np.expand_dims(waveform_np, axis=0)
+        waveform, sampling_rate = sf.read(wav_path)
+        waveform = torch.from_numpy(waveform).float()
+        if len(waveform.shape) > 1:
+            waveform = waveform.mean(1)
         else:
-            waveform = waveform_np.T
+            waveform = waveform.squeeze()
     except:
         waveform, sampling_rate = librosa.load(wav_path)
         waveform = np.expand_dims(waveform, axis=0)
