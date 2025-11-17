@@ -10,6 +10,13 @@ import torch
 import torchaudio
 import tempfile
 
+# Set torchaudio backend for reliable BytesIO operations in containerized environments
+# Fixes "Couldn't allocate AVFormatContext" error
+try:
+    torchaudio.set_audio_backend("soundfile")
+except Exception:
+    pass  # Fallback to default backend if soundfile not available
+
 
 def encode_wav(wav, sr, rep_format="wav"):
     with io.BytesIO() as wavio:
