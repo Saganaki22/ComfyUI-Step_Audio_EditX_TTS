@@ -4,7 +4,6 @@ import argparse
 import torch
 import logging
 from datetime import datetime
-import torchaudio
 import librosa
 import soundfile as sf
 
@@ -13,13 +12,6 @@ from tokenizer import StepAudioTokenizer
 from tts import StepAudioTTS
 from model_loader import ModelSource
 from config.edit_config import get_supported_edit_types
-
-# Set torchaudio backend for reliable BytesIO operations
-# Fixes "Couldn't allocate AVFormatContext" error in Gradio audio display
-try:
-    torchaudio.set_audio_backend("soundfile")
-except Exception:
-    pass  # Fallback to default backend if soundfile not available
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -33,8 +25,12 @@ def save_audio(audio_type, audio_data, sr, tmp_dir):
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     try:
+        # Always use soundfile for consistent behavior
         if isinstance(audio_data, torch.Tensor):
-            torchaudio.save(save_path, audio_data, sr)
+            audio_np = audio_data.cpu().numpy()
+            if audio_np.ndim == 2:
+                audio_np = audio_np.T  # [channels, samples] -> [samples, channels]
+            sf.write(save_path, audio_np, sr)
         else:
             sf.write(save_path, audio_data, sr)
         logger.debug(f"Audio saved to: {save_path}")
