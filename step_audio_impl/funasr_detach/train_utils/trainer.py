@@ -129,7 +129,7 @@ class Trainer:
         """
         ckpt = os.path.join(resume_path, "model.pt")
         if os.path.isfile(ckpt):
-            checkpoint = torch.load(ckpt)
+            checkpoint = torch.load(ckpt, weights_only=False)
             self.start_epoch = checkpoint["epoch"] + 1
             # self.model.load_state_dict(checkpoint['state_dict'])
             src_state = checkpoint["state_dict"]
