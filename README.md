@@ -342,7 +342,7 @@ n_edit_iterations: 1
 
 1. **Update transformers to the correct version:**
    ```bash
-   pip install transformers>=4.38.0
+   pip install transformers==4.53.3
    ```
 
 2. **Ensure required audio dependencies are installed:**
